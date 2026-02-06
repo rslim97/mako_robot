@@ -51,3 +51,9 @@ export GZ_SIM_RESOURCE_PATH="$HOME/.gazebo_models"  # ROS2
 export IGN_GAZEBO_RESOURCE_PATH="$HOME/.gazebo_models"  # ROS2
 export GZ_VERSION=harmonic
 ```
+
+### Running SLAM ###
+```
+ros2 launch mako_bringup slam_bringup.launch.py
+ros2 run teleop_twist_keyboard teleop_twist_keyboard
+```
