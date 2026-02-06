@@ -1,0 +1,225 @@
+<?xml version="1.0"?>
+<robot name="diff_drive" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:arg name="namespace" default="" />
+  <!-- include file -->
+  <xacro:include filename="$(find mecanum_description)/urdf/crta/diff_drive_properties.urdf.xacro" />
+  <xacro:include filename="$(find mecanum_description)/urdf/sensors/2d-lidar.xacro"/>
+  <!-- <xacro:include filename="$(find mecanum_description)/urdf/sensors/3d-lidar.xacro"/> -->
+  <xacro:include filename="$(find mecanum_description)/urdf/sensors/imu.xacro" />
+  <xacro:property name="s" value="0.3"/>
+
+  <link name="base_footprint"/>
+
+  <material name="orange">
+    <color rgba="0.8 0.4 0.0 1.0"/>
+  </material>
+
+  <material name="black">
+    <color rgba="0 0 0 1.0"/>
+  </material>
+
+  <material name="white">
+    <color rgba="1 1 1 1.0"/>
+  </material>
+  
+  <!-- Base Link -->
+  <link name="base_link">
+    <collision>
+      <origin xyz="${-0.151427*s} ${-0*s} ${0.5*s}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${2.01142*s} ${1*s} ${0.568726*s}"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="${-0.151427*s} ${-0*s} ${0.5*s}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${2.01142*s} ${1*s} ${0.568726*s}"/>
+      </geometry>
+      <material name="orange"/>
+    </visual>
+
+    <inertial>
+      <origin xyz="${-0.151427*s} ${-0*s} ${0.5*s}" rpy="0 0 0"/>
+      <mass value="${1.14395*pow(s, 3)}"/>
+      <inertia
+        ixx="${0.126164*pow(s, 5)}"
+        ixy="${0.0*pow(s, 5)}"
+        ixz="${0.0*pow(s, 5)}"
+        iyy="${0.416519*pow(s, 5)}"
+        iyz="${0.0*pow(s, 5)}"
+        izz="${0.481014*pow(s, 5)}"/>
+    </inertial>
+  </link>
+
+	<!-- <xacro:lidar parent="chassis" child="laser" xyz="0.04 0.0 0.035" rpy="0 0 0" /> -->
+
+	<xacro:lidar 
+    parent="base_link" 
+    child="laser">
+    <xacro:insert_block name="laser_pose"/>
+  </xacro:lidar>
+
+  
+  <xacro:imu
+      parent="base_link"
+      name="imu"
+      topic_name="imu">
+    <xacro:insert_block name="imu_sensor_pose" />
+  </xacro:imu>
+  
+  <joint name="left_wheel_joint" type="continuous">
+    <origin xyz="${0.554283*s} ${0.625029*s} ${0.3*s}" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="left_wheel"/>
+    <axis xyz="0 1 0"/>
+    <dynamics damping="0.2"/>
+  </joint>
+
+  <!-- left wheel Link -->
+  <link name="left_wheel">
+    <collision>
+      <origin rpy="${pi/2} 0 0"/>
+      <geometry>
+        <cylinder radius="${0.3*s}" length="${0.05*s}"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin rpy="${pi/2} 0 0"/>
+      <geometry>
+        <cylinder radius="${0.3*s}" length="${0.05*s}"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+
+    <inertial>
+      <mass value="${2*pow(s, 3)}"/>
+      <inertia ixx="${0.145833*pow(s, 5)}"
+               ixy="${0.0*pow(s, 5)}"
+               ixz="${0.0*pow(s, 5)}"
+               iyy="${0.145833*pow(s, 5)}"
+               iyz="${0.0*pow(s, 5)}"
+               izz="${0.125*pow(s, 5)}"/>
+    </inertial>
+  </link>
+
+  <joint name="right_wheel_joint" type="continuous">
+    <origin xyz="${0.554283*s} ${-0.625029*s} ${0.3*s}" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="right_wheel"/>
+    <axis xyz="0 1 0"/>
+    <dynamics damping="0.2"/>
+  </joint>
+
+  <!-- right wheel Link -->
+  <link name="right_wheel">
+    <collision>
+      <origin rpy="${pi/2} 0 0"/>
+      <geometry>
+        <cylinder radius="${0.3*s}" length="${0.05*s}"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin rpy="${pi/2} 0 0"/>
+      <geometry>
+        <cylinder radius="${0.3*s}" length="${0.05*s}"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+
+    <inertial>
+      <mass value="${2*pow(s, 3)}"/>
+      <inertia ixx="${0.145833*pow(s, 5)}"
+               ixy="${0.0*pow(s, 5)}"
+               ixz="${0.0*pow(s, 5)}"
+               iyy="${0.145833*pow(s, 5)}"
+               iyz="${0.0*pow(s, 5)}"
+               izz="${0.125*pow(s, 5)}"/>
+      </inertial>
+  </link>
+
+  <joint name="caster_joint" type="fixed">
+    <origin xyz="${-0.957138*s} ${-0*s} ${0.2*s}" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="caster"/>
+  </joint>
+
+  <!-- caster frontal wheel Link -->
+  <link name="caster">
+    <collision>
+      <geometry>
+        <sphere radius="${0.2*s}"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <geometry>
+        <sphere radius="${0.2*s}"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+
+    <inertial>
+      <origin xyz="${-0.957138*s} ${-0*s} ${0.2*s}" rpy="0 0 0"/>
+      <mass value="${0.005*pow(s, 3)}"/>
+      <inertia
+        ixx="${0.1*pow(s, 5)}"
+        ixy="${0.0*pow(s, 5)}"
+        ixz="${0.0*pow(s, 5)}"
+        iyy="${0.1*pow(s, 5)}"
+        iyz="${0.0*pow(s, 5)}"
+        izz="${0.1*pow(s, 5)}"/>
+    </inertial>
+  </link>
+
+  <gazebo reference="caster">
+    <mu1>0.01</mu1>
+    <mu2>0.01</mu2>
+  </gazebo>
+
+  <joint name="base_to_footprint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <ros2_control name="GazeboSimSystem" type="system">
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+    <joint name="left_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-1</param>
+        <param name="max">1</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="right_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-1</param>
+        <param name="max">1</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <gazebo>
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <ros>
+        <namespace>$(arg namespace)</namespace>
+        <!-- remap unstamped cmd_vel-->
+        <remapping>/diff_drive_base_controller/cmd_vel_unstamped:=/cmd_vel</remapping>
+        <!-- remap stamped cmd_vel-->
+        <!-- <remapping>/mecanum_drive_controller/reference:=/cmd_vel</remapping> -->  
+        <remapping>/diff_drive_base_controller/odom:=/odom</remapping>
+      </ros>
+      <parameters>$(find mecanum_description)/config/linorobot_diff_drive_controller.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+</robot>

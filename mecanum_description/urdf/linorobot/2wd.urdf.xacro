@@ -1,0 +1,124 @@
+<?xml version="1.0"?>
+<robot name="linorobot2_2wd" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:arg name="namespace" default="" />
+  <xacro:include filename="$(find mecanum_description)/urdf/linorobot/2wd_properties.urdf.xacro" />
+  <xacro:include filename="$(find mecanum_description)/urdf/linorobot/mech/base.urdf.xacro" />
+  <xacro:include filename="$(find mecanum_description)/urdf/linorobot/mech/wheel.urdf.xacro" />
+  <xacro:include filename="$(find mecanum_description)/urdf/linorobot/mech/caster_wheel.urdf.xacro" />
+  <!-- <xacro:include filename="$(find mecanum_description)/urdf/sensors/imu.urdf.xacro" /> -->
+  <xacro:include filename="$(find mecanum_description)/urdf/sensors/lidar.xacro" />
+  <!-- <xacro:include filename="$(find mecanum_description)/urdf/sensors/depth_sensor.urdf.xacro" />
+  <xacro:include filename="$(find mecanum_description)/urdf/sensors/camera.urdf.xacro" />
+  <xacro:include filename="$(find mecanum_description)/urdf/controllers/diff_drive.urdf.xacro" /> -->
+
+  <xacro:base 
+    length="${base_length}" 
+    width="${base_width}" 
+    height="${base_height}" 
+    mass="${base_mass}"
+    wheel_radius="${wheel_radius}"
+    wheel_pos_z="${wheel_pos_z}"
+/>
+
+  <xacro:wheel 
+    side="left"
+    radius="${wheel_radius}" 
+    width="${wheel_width}" 
+    pos_x="${wheel_pos_x}" 
+    pos_y="${wheel_pos_y}" 
+    pos_z="${wheel_pos_z}" 
+    mass="${wheel_mass}"
+  />
+
+  <xacro:wheel 
+    side="right"
+    radius="${wheel_radius}" 
+    width="${wheel_width}" 
+    pos_x="${wheel_pos_x}" 
+    pos_y="${-wheel_pos_y}" 
+    pos_z="${wheel_pos_z}" 
+    mass="${wheel_mass}"
+  />
+
+  <xacro:if value="${front_caster_wheel}">
+    <xacro:caster_wheel 
+      side="front"
+      mass="0.01"
+      base_length="${base_length}" 
+      wheel_radius="${wheel_radius}" 
+      wheel_pos_z="${wheel_pos_z}" 
+    />
+  </xacro:if>
+
+  <xacro:if value="${rear_caster_wheel}">
+    <xacro:caster_wheel 
+      side="rear"
+      mass="0.01"
+      base_length="${base_length}" 
+      wheel_radius="${wheel_radius}" 
+      wheel_pos_z="${wheel_pos_z}" 
+    />
+  </xacro:if>
+
+  <!-- <xacro:imu/> -->
+
+  <!-- <xacro:generic_laser>
+    <xacro:insert_block name="laser_pose" />
+  </xacro:generic_laser> -->
+  
+  <!-- <xacro:depth_sensor>
+    <xacro:insert_block name="depth_sensor_pose" />
+  </xacro:depth_sensor>
+
+  <xacro:rgb_camera
+      parent="base_link"
+      name="rear_rgb_camera"
+      topic_name="rear_rgb_camera/image">
+    <xacro:insert_block name="rear_camera_sensor_pose" />
+  </xacro:rgb_camera> -->
+
+  <!-- <xacro:diff_drive_controller
+    wheel_separation="${wheel_pos_y * 2}"
+    wheel_radius="${wheel_radius}"
+    wheel_torque="${wheel_torque}"
+  /> -->
+
+  <xacro:lidar parent="base_link" child="laser">
+    <xacro:insert_block name="laser_pose"/>
+    <!-- <origin xyz="0.1 0 0.2" rpy="0 0 0"/>  -->
+  </xacro:lidar>
+
+      <ros2_control name="GazeboSimSystem" type="system">
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+    <joint name="left_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-1</param>
+        <param name="max">1</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="right_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-1</param>
+        <param name="max">1</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <gazebo>
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <parameters>$(find mecanum_description)/config/linorobot_diff_drive_controller.yaml</parameters>
+      <ros>
+        <namespace>$(arg namespace)</namespace>
+        <remapping>/diff_drive_base_controller/cmd_vel_unstamped:=/cmd_vel</remapping>
+        <remapping>/diff_drive_base_controller/odom:=/odom</remapping>
+      </ros>
+    </plugin>
+  </gazebo>
+
+</robot>

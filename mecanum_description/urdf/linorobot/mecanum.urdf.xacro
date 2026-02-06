@@ -1,0 +1,153 @@
+<?xml version="1.0"?>
+<robot name="linorobot2_2wd" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find mecanum_description)/urdf/linorobot/mecanum_properties.urdf.xacro" />
+  <xacro:include filename="$(find mecanum_description)/urdf/linorobot/mech/base.urdf.xacro" />
+  <xacro:include filename="$(find mecanum_description)/urdf/linorobot/mech/mecanum_wheel.urdf.xacro" />
+  <!-- <xacro:include filename="$(find mecanum_description)/urdf/sensors/imu.urdf.xacro" /> -->
+  <xacro:include filename="$(find mecanum_description)/urdf/sensors/lidar.xacro" />
+  <!-- <xacro:include filename="$(find mecanum_description)/urdf/sensors/depth_sensor.urdf.xacro" /> -->
+  <xacro:include filename="$(find mecanum_description)/urdf/sensors/camera.xacro" />
+  <!-- <xacro:include filename="$(find mecanum_description)/urdf/controllers/omni_drive.urdf.xacro" /> -->
+
+  <xacro:base 
+    length="${base_length}" 
+    width="${base_width}" 
+    height="${base_height}" 
+    mass="${base_mass}"
+    wheel_radius="${wheel_radius}"
+    wheel_pos_z="${wheel_pos_z}"
+/>
+
+  <xacro:mecanum_wheel 
+    side="front_left"
+    radius="${wheel_radius}" 
+    width="${wheel_width}" 
+    pos_x="${wheel_pos_x}" 
+    pos_y="${wheel_pos_y}" 
+    pos_z="${wheel_pos_z}" 
+    mass="${wheel_mass}"
+  />
+
+  <xacro:mecanum_wheel 
+    side="front_right"
+    radius="${wheel_radius}" 
+    width="${wheel_width}" 
+    pos_x="${wheel_pos_x}" 
+    pos_y="${-wheel_pos_y}" 
+    pos_z="${wheel_pos_z}" 
+    mass="${wheel_mass}"
+  />
+  <xacro:mecanum_wheel 
+    side="rear_left"
+    radius="${wheel_radius}" 
+    width="${wheel_width}" 
+    pos_x="${-wheel_pos_x}" 
+    pos_y="${wheel_pos_y}" 
+    pos_z="${wheel_pos_z}" 
+    mass="${wheel_mass}"
+  />
+
+  <xacro:mecanum_wheel 
+    side="rear_right"
+    radius="${wheel_radius}" 
+    width="${wheel_width}" 
+    pos_x="${-wheel_pos_x}" 
+    pos_y="${-wheel_pos_y}" 
+    pos_z="${wheel_pos_z}" 
+    mass="${wheel_mass}"
+  />
+
+  <!-- <xacro:imu/> -->
+  
+  <!-- <xacro:generic_laser>
+    <xacro:insert_block name="laser_pose" />
+  </xacro:generic_laser> -->
+  
+  <!-- <xacro:depth_sensor>
+    <xacro:insert_block name="depth_sensor_pose" />
+  </xacro:depth_sensor> -->
+
+  <xacro:rgbd_camera
+      parent="base_link"
+      name="camera"
+      topic_name="image">
+    <xacro:insert_block name="camera_sensor_pose" />
+  </xacro:rgbd_camera>
+
+  <!-- <xacro:omni_drive_controller/> -->
+
+  <!-- <xacro:lidar 
+    parent="base_link" 
+    child="laser">
+    <xacro:insert_block name="laser_pose"/>
+  </xacro:lidar> -->
+
+  <!-- <xacro:lidar 
+    parent="base_link" 
+    child="laser">
+    <xacro:insert_block name="laser_pose"/>
+  </xacro:lidar> -->
+
+  <xacro:lidar parent="base_link" child="laser">
+    <xacro:insert_block name="laser_pose"/>
+    <!-- <origin xyz="0.1 0 0.2" rpy="0 0 0"/>  -->
+  </xacro:lidar>
+
+     <!-- xyz="0.04 0.0 0.035" rpy="0 0 0" /> -->
+
+  <!-- Define the vehicles hardware, command and state interfaces -->
+  <ros2_control name="GazeboSimSystem" type="system">
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+    <joint name="front_left_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-1</param>
+        <param name="max">1</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="front_right_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-1</param>
+        <param name="max">1</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="rear_left_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-1</param>
+        <param name="max">1</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="rear_right_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-1</param>
+        <param name="max">1</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <!-- ROS2 Control plugin and topic re-mapping -->
+  <gazebo>
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <parameters>$(find mecanum_description)/config/linorobot_mecanum_drive_controller.yaml</parameters>
+      <ros>
+        <!-- remap unstamped cmd_vel-->
+        <remapping>/mecanum_drive_controller/reference_unstamped:=/cmd_vel</remapping>
+        <!-- remap stamped cmd_vel-->
+        <!-- <remapping>/mecanum_drive_controller/reference:=/cmd_vel</remapping> -->  
+        <remapping>/mecanum_drive_controller/odometry:=/odom</remapping>
+        <remapping>/mecanum_drive_controller/tf_odometry:=/tf</remapping>
+      </ros>
+    </plugin>
+  </gazebo>
+  
+</robot>

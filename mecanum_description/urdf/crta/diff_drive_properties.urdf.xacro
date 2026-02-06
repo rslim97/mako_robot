@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:property name="laser_pose">
+    <origin xyz="-0.01425 0 0.2575" rpy="0 0 0"/>
+  </xacro:property>
+
+  <!-- <xacro:property name="depth_sensor_pose">
+    <origin xyz="0.2375 0 0.06" rpy="0 0 0"/>
+  </xacro:property> -->
+
+  <xacro:property name="camera_sensor_pose">
+    <origin xyz="-0.32125 0.0 0.2275" rpy="0 0 3.14159"/>
+  </xacro:property>
+
+  <xacro:property name="imu_sensor_pose">
+    <origin xyz="-0.01525 0.0 0.4275" rpy="0 0 0"/>
+  </xacro:property>
+
+</robot>
